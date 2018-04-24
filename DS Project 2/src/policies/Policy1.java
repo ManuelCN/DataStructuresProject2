@@ -5,92 +5,81 @@ import java.util.ArrayList;
 import p2MainClasses.Client;
 import queue.Queue;
 import queue.SLLQueue;
-/**
- * SINGLE LINE, MULTIPLE SERVERS
- * One waiting line only. First person in line will be assigned to first empty post.
- * If no post is empty, person will remain in line.
- * If more than one post is available, person will be assigned to lowest index post.
- * @author manny
- *
- */
-public class Policy1 {
-	
-	private Queue<Client> clientQueue;
-	private Queue<Client> waitingQueue;
-	private static Queue<Client>[] servicePosts;
-	private int serviceStations;
-	
-	
-	public Policy1(Queue<Client> cq, int ss) {
-		this.clientQueue = cq;
-		this.waitingQueue = new SLLQueue<>();
-		this.serviceStations = ss;
-	}
-	
-	public ArrayList<Client> runSimulation(){
-		
-		servicePosts = new SLLQueue[serviceStations];
-		for(int i = 0; i < servicePosts.length; i++) {
-			servicePosts[i] = new SLLQueue<>();
-		}
-		
-		ArrayList<Client>terminatedJobs = new ArrayList<>();
-		
-		int timeUnit = 1;
-		boolean done = false;
-		while(!done) {
-			System.out.println("Time unit: " + timeUnit);
-			if(!clientQueue.isEmpty()) {
-				Client tempClient = clientQueue.first();
 
-				if(tempClient.getArrivalTime() == timeUnit) {
-					System.out.println("Added client " + tempClient.getClientID() + " to waiting queue at " + timeUnit + " time units!");
-					System.out.println(tempClient);
-					waitingQueue.enqueue(clientQueue.dequeue());
-				}
-			}
-			
-			if(!waitingQueue.isEmpty()) {
-				Client tempClient = waitingQueue.first();
-				for(int i=0; i<servicePosts.length; i++) {
-					if(servicePosts[i].isEmpty()) {
-						System.out.println("Added client " + tempClient.getClientID() + " to service post " + (i+1) + "!");
-						servicePosts[i].enqueue(waitingQueue.dequeue());
-						break;
-					}
-				}
-			}
-			
-			for(int i=0; i<servicePosts.length; i++) {
-				if(!servicePosts[i].isEmpty()) {
-					Client tempClient = servicePosts[i].first();
-					System.out.println("Servicing client " + tempClient.getClientID() + " at service post " + (i+1) + "!");
-					tempClient.isServed(1);
-					System.out.println("Current client remaining time: " + tempClient.getRemainingTime());
-					if(tempClient.getRemainingTime() == 0) {
-						System.out.println("Finished servicing client " + tempClient.getClientID() + "!");
-						tempClient.setDepartureTime(timeUnit);
-						terminatedJobs.add(servicePosts[i].dequeue());
-					}
-				}
-			}
-			
-			int donePosts = 0;
-			for(int i=0; i<servicePosts.length; i++) {
-				if(waitingQueue.isEmpty() && servicePosts[i].isEmpty()) {
-					donePosts++;
-				}
-			}
-			
-			if(donePosts == servicePosts.length || timeUnit == 100) {
-				System.out.println("All posts finished!");
-				done = true;
-			}
-			timeUnit++;
-			System.out.println();
-		}
-		
-		return terminatedJobs;
+public class Policy1 extends AbstractPolicy{
+	
+	private Queue<Client> waitingQueue;
+	private static ServicePost[] servicePosts;
+	private static int serviceStations;
+	private static ArrayList<Client> completedJobs;
+	
+	public Policy1(int postNum) {
+		this.waitingQueue = new SLLQueue<>();
+		serviceStations = postNum;
+		completedJobs = new ArrayList<>();
+		servicePosts = super.initPosts(serviceStations);
 	}
+	
+	public Post getPost(int index) {	return (Post) servicePosts[index];	}
+	
+	public boolean distribute(Client customer) {
+		for(int i=0; i<serviceStations; i++) {
+			Post tempPost = (Post) servicePosts[i];
+			if(tempPost.isPostEmpty()) {
+				System.out.println("Added client " + customer.getClientID() +
+						" to service post " + tempPost.getID());
+				tempPost.addToPost(customer);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void provideService(int time, int service) {
+		for(int i=0; i<serviceStations; i++) {
+			Post tempPost = (Post) servicePosts[i];
+			if(!tempPost.isPostEmpty()) {
+				System.out.println("Servicing customer " + tempPost.getCurrentClient().getClientID() +
+						" at post " + tempPost.getID());
+				if(tempPost.serviceCustomer(service)) {
+					Client temp = tempPost.removeFromPost();
+					temp.setDepartureTime(time);
+					System.out.println("Finished servicing customer " + temp.getClientID());
+					completedJobs.add(temp);
+				}
+			}
+		}
+	}
+	
+	public boolean arePostsEmpty() {
+		for(int i=0; i<serviceStations; i++) {
+			if(!servicePosts[i].isPostEmpty()) {	return false;	}
+		}
+		return true;
+	}
+	/**
+	 * Add the client to the waiting queue if all service posts are currently unavailable.
+	 * @param customer	Client to be added to the waiting queue.
+	 */
+	public void addToWait(Client customer) {
+		System.out.println("Added customer " + customer.getClientID() + " to wait queue.");
+		waitingQueue.enqueue(customer);
+	}
+	/**
+	 * If the waiting queue is not empty, verify if its first client can be distributed
+	 * to a service post. If available, that first client will be moved from the waiting queue
+	 * to the service post.
+	 */
+	public void distributeWait() {
+		Client tempClient = waitingQueue.first();
+		if(this.distribute(tempClient)) {	waitingQueue.dequeue();	}
+	}
+	/**
+	 * Verifies if the waiting queue is empty.
+	 * @return	True if the waiting queue is empty; otherwise, returns False.
+	 */
+	public boolean isWaitEmpty() {	return waitingQueue.isEmpty();	}
+
+	public ArrayList<Client> getCompletedJobs() {	return completedJobs;	}
 
 }

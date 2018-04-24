@@ -13,17 +13,16 @@ public class FilesGeneratorMain {
 	public static void main(String[] args) throws FileNotFoundException {
 		
 		if (args.length <= 4) {
-			int n = 7; 					//Number of files
+			int n = 7; 						//Number of files
 			int l = 10;						//Number of clients
 			int t = 5;						//Arrival Times
-			int s = 8;						//Service times
+			int s = 10;						//Service times
 			
-			int size = 200; 			//Originally 50000
 			if (args.length >= 1)	{	n = Integer.parseInt(args[0]);	}
 			if (args.length >= 2)	{	l = Integer.parseInt(args[1]);	}
 			if (args.length >= 3)	{	t = Integer.parseInt(args[2]);	}
 			if (args.length == 4)	{	s = Integer.parseInt(args[3]);	}
-			generateFiles(n, l, t, s, size); 
+			generateFiles(n, l, t, s); 
 		}	else	{
 			System.out.println("Invalid number of parameters. Must be <= 2.");
 		}
@@ -31,7 +30,7 @@ public class FilesGeneratorMain {
  
 	}
 
-	private static void generateFiles(int fileNum, int lineNum, int arrivalTimes, int serviceTimes, int size) throws FileNotFoundException {
+	private static void generateFiles(int fileNum, int lineNum, int arrivalTimes, int serviceTimes) throws FileNotFoundException {
 		String parentDirectory = "inputFiles";   // must exist in current directory
 		Random rand = new Random();
 		
@@ -52,6 +51,7 @@ public class FilesGeneratorMain {
 				out.print("\t");
 				out.print(rand.nextInt(serviceTimes) + 1);
 				out.println();
+//				arriv = arriv + rand.nextInt(arrivalTimes);
 				arriv++;
 			}				
 			out.close();

@@ -38,7 +38,7 @@ public class SLLQueue<E> implements Queue<E> {
 		}
 	}
 	
-	private Node<E> first, last;
+	private Node<E> first, next, last;
 	private int size;
 	
 	public SLLQueue() {
@@ -57,6 +57,13 @@ public class SLLQueue<E> implements Queue<E> {
 	public E first() {
 		if(isEmpty()) {	return null;	}
 		return first.getElement();
+	}
+	
+	public E second() {
+		if(size == 1) {
+			return null;
+		}
+		return first.getNext().getElement();
 	}
 
 	public void enqueue(E element) {
