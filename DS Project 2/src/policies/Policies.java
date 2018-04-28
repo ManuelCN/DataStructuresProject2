@@ -3,6 +3,7 @@ package policies;
 import java.util.ArrayList;
 
 import p2MainClasses.Client;
+import posts.ServicePost;
 
 public interface Policies {
 	
@@ -11,14 +12,20 @@ public interface Policies {
 	 * @param index	The index of the service post to be returned.
 	 * @return	A service post.
 	 */
-	Post getPost(int index);
+	ServicePost getPost(int index);
 	/**
 	 * Adds a client to a service post.
 	 * @param customer	The client to be added to the service post.
+	 * @param time	Time unit at which the client tried to be distributed.
 	 * @return	True if client was successfully added to a service post;
 	 * if otherwise, returns False.
 	 */
-	boolean distribute(Client customer);
+	boolean distribute(Client customer, int time);
+	/**
+	 * Removes the clients whose remaining time reached zero from the service posts.
+	 * @param time	The time at which the service-completed event occurred.
+	 */
+	void removeCompleted(int time);
 	/**
 	 * For each post that is not empty, provide service for the amount of time specified 
 	 * to their current first customer.
@@ -41,8 +48,9 @@ public interface Policies {
 	 * If the waiting queue is not empty, verify if its first client can be distributed
 	 * to a service post. If available, that first client will be moved from the waiting queue
 	 * to the service post.
+	 * @param time	Time at which the customers in the waiting queue are redistributed.
 	 */
-	void distributeWait();
+	void distributeWait(int time);
 	/**
 	 * Verifies if the waiting queue is empty.
 	 * @return	True if the waiting queue is empty; otherwise, returns False.

@@ -11,47 +11,39 @@ import java.util.Scanner;
  */
 public class DataReader {
 
-	private Integer[][] data;
-	String[] fileNames = new String[7];
+	private ArrayList<String> fileNames;
 	private String parentDirectory; 
 	
 
 	public DataReader() throws FileNotFoundException {
+		fileNames = new ArrayList<>();
 		parentDirectory = "inputFiles";
 		File input = new File(parentDirectory, "dataFiles.txt");
 		if(!input.exists()) {
 			throw new FileNotFoundException("Directory or file does not exist!");
 		}
 		Scanner dataFiles = new Scanner(input);
-		int index = 0;
 		while(dataFiles.hasNextLine()) {
-			fileNames[index] = dataFiles.nextLine();
-			index++;
+			fileNames.add(dataFiles.nextLine());
 		}
 		dataFiles.close();
 	}
 	
-	/**
-	 * 
-	 * @return
-	 * @throws FileNotFoundException 
-	 */
-	public Object[][] readDataFiles() throws FileNotFoundException {
-		
-		data = new Integer[fileNames.length][];
-		for(int i=0; i<fileNames.length; i++) {
-			String fileName = fileNames[i];
-			Scanner inputFile = new Scanner(new File(parentDirectory, fileName));
-			ArrayList<Integer> fileContent = new ArrayList<>();
-			while(inputFile.hasNext()) {
-				
-				fileContent.add(inputFile.nextInt());
-				fileContent.add(inputFile.nextInt());
-			}
-			inputFile.close();
-			data[i] = (Integer[]) fileContent.toArray(new Integer[0]);
+	public int getFileNumber() {
+		return fileNames.size();
+	}
+	
+	public Object[] readDataFiles(int file) throws FileNotFoundException {
+		String fileName = fileNames.get(file);
+		Scanner inputFile = new Scanner(new File(parentDirectory, fileName));
+		ArrayList<Integer> fileContent = new ArrayList<>();
+		while(inputFile.hasNext()) {
+			fileContent.add(inputFile.nextInt());
+			fileContent.add(inputFile.nextInt());
 		}
-		return data;
+		inputFile.close();
+		return fileContent.toArray(new Integer[fileContent.size()]);
+
 	}
 	
 	private void printArray(Integer[] numbers) {

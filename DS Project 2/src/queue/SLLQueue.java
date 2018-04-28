@@ -7,13 +7,16 @@ public class SLLQueue<E> implements Queue<E> {
 		private Node<E> next;
 		
 		public Node() {
-			element = null;
-			next = null;
+			this(null, null);
 		}
 		
 		public Node(E e) {
+			this(e, null);
+		}
+		
+		public Node(E e, Node<E> n) {
 			element = e;
-			next = null;
+			next = n;
 		}
 		
 		public E getElement() {
@@ -38,7 +41,7 @@ public class SLLQueue<E> implements Queue<E> {
 		}
 	}
 	
-	private Node<E> first, next, last;
+	private Node<E> first, last;
 	private int size;
 	
 	public SLLQueue() {

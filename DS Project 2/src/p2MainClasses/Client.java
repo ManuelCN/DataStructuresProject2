@@ -2,27 +2,28 @@ package p2MainClasses;
 
 public class Client {
 	
-	private int clientID;			//Id of this job
-	private int arrivalTime;	//Arrival time of this job
-	private int remainingTime;	//Remaining service time for this job
-	private int departureTime;	//Time when the service for this job is completed
-	private int averageTime;
+	private int clientID;					//Id of this job
+	private int arrivalTime;				//Arrival time of this job
+	private int remainingTime;				//Remaining service time for this job
+	private int initServiceTime;			//Time at which service began
+	private int waitTime;					//Amount of time waited
+	private boolean beingServed;			//Indicates whether the client has being receiving service.
 	
 	public Client(int id, int at, int rt) {
 		clientID = id;
 		arrivalTime = at;
 		remainingTime = rt;
-		averageTime = 0;
+		initServiceTime = 0;
+		waitTime = 0;
+		beingServed = false;
 	}
 	
-	public int getDepartureTime() {
-		return departureTime;
+	public boolean isBeingServed() {
+		return beingServed;
 	}
 	
-	public void setDepartureTime(int departureTime) {
-		this.departureTime = departureTime;
-		this.averageTime = this.departureTime - this.arrivalTime;
-		
+	public void receivingService() {
+		beingServed = true;
 	}
 	
 	public int getClientID() {
@@ -42,16 +43,24 @@ public class Client {
 		remainingTime -= q;
 	}
 	
-	public int getAverageTime() {
-		return this.averageTime;
+	public int getWaitTime() {
+		return this.waitTime;
+	}
+	
+	public int getServiceInitTime() {
+		return this.initServiceTime;
+	}
+	
+	public void setServiceInitTime(int servInit) {
+		this.initServiceTime = servInit;
+		this.waitTime = this.initServiceTime - this.arrivalTime;
 	}
 	
 	public String toString() {
 		return "Client ID = " + clientID +
 				", Arrival Time = " + arrivalTime +
 				", Remaining Time = " + remainingTime +
-				", Departure Time = " + departureTime +
-				", Average Time = " + averageTime;
+				", Waiting Time = " + waitTime;
 	}
 
 }
