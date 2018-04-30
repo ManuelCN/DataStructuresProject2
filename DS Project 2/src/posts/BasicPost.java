@@ -3,7 +3,11 @@ package posts;
 import p2MainClasses.Client;
 import queue.Queue;
 import queue.SLLQueue;
-
+/**
+ * Basic implementation of a service post using Singly Linked List Queues.
+ * @author Manuel E. Castañeda
+ *
+ */
 public class BasicPost implements ServicePost {
 	
 	private Queue<Client> postQueue;
@@ -38,7 +42,9 @@ public class BasicPost implements ServicePost {
 	public Client getCurrentClient() {
 		return postQueue.first();
 	}
-	
+	/**
+	 * @return	Returns the service post's queue.
+	 */
 	public Queue<Client> getQueue() {
 		 return postQueue;
 	}

@@ -10,13 +10,13 @@ import java.util.Scanner;
  * @author pedroirivera-vega
  *
  */
-public class DataReader {
+public class FileReader {
 
 	private ArrayList<String> fileNames;
 	private String parentDirectory; 
 	
 
-	public DataReader() throws FileNotFoundException {
+	public FileReader() throws FileNotFoundException {
 		fileNames = new ArrayList<>();
 		parentDirectory = "inputFiles";
 		File input = new File(parentDirectory, "dataFiles.txt");

@@ -3,7 +3,13 @@ package posts;
 import p2MainClasses.Client;
 import queue.DLLDeque;
 import queue.Deque;
-
+/**
+ * Advanced implementation of a service post using Doubly Linked List Deques.
+ * This advanced implementation allows quick access to first and last clients
+ * in the post's queue.
+ * @author Manuel E. Castañeda
+ *
+ */
 public class AdvancedPost implements ServicePost {
 	
 	private Deque<Client> postQueue;
@@ -47,7 +53,9 @@ public class AdvancedPost implements ServicePost {
 	public Client getLastClient() {
 		return postQueue.last();
 	}
-	
+	/**
+	 * @return	Returns the service post's queue.
+	 */
 	public Deque<Client> getQueue() {
 		return postQueue;
 	}

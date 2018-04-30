@@ -8,7 +8,16 @@ import posts.BasicPost;
 import posts.ServicePost;
 import queue.Queue;
 import queue.SLLQueue;
-
+/**
+ * Single Line Multiple Servers (SLMS)
+ * In this policy, there is only one common waiting line.
+ * If an arriving client can be distributed to an empty post, it will be assigned to the first empty post.
+ * The post chosen will always the lowest index possible.
+ * If the client cannot be distributed when it arrives, it will join the waiting queue.
+ * As soon as a post is available, the first client of the waiting queue will then be distributed.
+ * @author Manuel E. Castañeda
+ *
+ */
 public class Policy1 extends AbstractPolicy{
 	
 	private Queue<Client> waitingQueue;
@@ -38,7 +47,7 @@ public class Policy1 extends AbstractPolicy{
 	
 	public void provideService(int time, int service) {
 		for(int i=0; i<serviceStations; i++) {
-			BasicPost tempPost = (BasicPost) servicePosts[i];
+			BasicPost tempPost = (BasicPost) this.getPost(i);
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
 					tempPost.getCurrentClient().receivingService();
@@ -72,14 +81,14 @@ public class Policy1 extends AbstractPolicy{
 	public boolean isWaitEmpty() {	return waitingQueue.isEmpty();	}
 
 	public void checkOverpass() {
-		if(servicePosts.length > 1) {
+		if(serviceStations > 1) {
 			Iterator<Client> iter = waitingQueue.iterator();
 			while(iter.hasNext()) {
 				Client c = iter.next();
-				for(int post=0; post<servicePosts.length; post++) {
-					if(!servicePosts[post].isPostEmpty()) {
-						if(servicePosts[post].getCurrentClient() != c) {
-							Client temp = servicePosts[post].getCurrentClient();
+				for(int post=0; post<serviceStations; post++) {
+					if(!this.getPost(post).isPostEmpty()) {
+						Client temp = this.getPost(post).getCurrentClient();
+						if(temp != c) {
 							if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
 								c.overpassed();
 							}

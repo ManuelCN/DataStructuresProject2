@@ -3,7 +3,7 @@ package p2MainClasses;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import dataGenerator.DataReader;
+import dataGenerator.FileReader;
 import policies.AbstractPolicy;
 import policies.Policies;
 import policies.Policy1;
@@ -16,7 +16,7 @@ import queue.SLLQueue;
 
 public class SimulationMain {
 	
-	private static DataReader reader;
+	private static FileReader reader;
 	private static Integer[] readData;
 	private static int serviceStations;
 
@@ -25,7 +25,7 @@ public class SimulationMain {
 		serviceStations = 1;
 		
 		try {
-			reader = new DataReader();
+			reader = new FileReader();
 			int file = 0;
 			readData = (Integer[]) reader.readDataFiles(file);
 			printDataArray(readData);

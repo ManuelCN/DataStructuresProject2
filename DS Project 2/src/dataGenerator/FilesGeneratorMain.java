@@ -6,8 +6,6 @@ import java.io.PrintWriter;
 import java.util.Random;
 import java.util.Scanner;
 
-import dataGenerator.DataGenerator;
-
 public class FilesGeneratorMain {
 
 	public static void main(String[] args) throws FileNotFoundException {
@@ -52,7 +50,6 @@ public class FilesGeneratorMain {
 				out.print(rand.nextInt(serviceTimes) + 3);
 				out.println();
 				arriv = arriv + rand.nextInt(arrivalTimes) + 1;
-//				arriv++;
 			}				
 			out.close();
 		}

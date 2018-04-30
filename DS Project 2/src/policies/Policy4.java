@@ -6,7 +6,14 @@ import java.util.Iterator;
 import p2MainClasses.Client;
 import posts.AdvancedPost;
 import posts.ServicePost;
-
+/**
+ * Multiple Lines Multiple Servers and Balanced Waiting Times (MLMLBWT)
+ * In this policy, each post has its own waiting queue.
+ * As clients arrive, they are distributed to the lowest index post which is either empty or 
+ * has the lowest expected waiting time with respect to the others.
+ * @author Manuel E. Castañeda
+ *
+ */
 public class Policy4 extends AbstractPolicy {
 
 	private static Monitor monitor;
@@ -24,9 +31,7 @@ public class Policy4 extends AbstractPolicy {
 
 	public boolean distribute(Client customer, int time) {
 		int postIndex = monitor.minWaitPost();
-		AdvancedPost selectedPost = (AdvancedPost) servicePosts[postIndex];
-		System.out.println("Added client " + customer.getClientID() +
-				" to service post " + selectedPost.getID());
+		AdvancedPost selectedPost = (AdvancedPost) this.getPost(postIndex);
 		selectedPost.addToPost(customer);
 		monitor.addPostTime(postIndex, customer.getRemainingTime());
 		if(selectedPost.getCurrentClient() == customer) {
@@ -37,7 +42,7 @@ public class Policy4 extends AbstractPolicy {
 
 	public void provideService(int time, int service) {
 		for(int i=0; i<serviceStations; i++) {
-			AdvancedPost tempPost = (AdvancedPost) servicePosts[i];
+			AdvancedPost tempPost = (AdvancedPost) this.getPost(i);
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
 					tempPost.getCurrentClient().receivingService();
@@ -67,40 +72,34 @@ public class Policy4 extends AbstractPolicy {
 	}
 	
 	public void checkOverpass() {
-		if(!this.arePostsEmpty()) {
-			for(int post = 0; post < servicePosts.length; post++) {
-				if(!servicePosts[post].isPostEmpty()) {
-					Iterator<Client> iter = ((AdvancedPost) servicePosts[post]).getQueue().iterator();
-					while(iter.hasNext()) {
-						Client c = iter.next();
-						if(c != servicePosts[post].getCurrentClient()) {
-							Client temp = servicePosts[post].getCurrentClient();
-							if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
-								c.overpassed();
+		if(serviceStations > 1) {
+			for(int post = 0; post < serviceStations; post++) {
+				Iterator<Client> iter = ((AdvancedPost)this.getPost(post)).getQueue().iterator();
+				while(iter.hasNext()) {
+					Client c = iter.next();
+					if(!this.arePostsEmpty()) {
+						for(int i=0; i<serviceStations; i++) {
+							if(!this.getPost(i).isPostEmpty()) {
+								Client temp = this.getPost(i).getCurrentClient();
+								if(temp != c) {
+									if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+										c.overpassed();
+									}
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-			
-			
-//			for(int post = 0; post < servicePosts.length; post++) {
-//				Iterator<Client> iter = ((AdvancedPost) servicePosts[post]).getQueue().iterator();
-//				while(iter.hasNext()) {
-//					Client c = iter.next();
-//					for(int i=post + 1; i<servicePosts.length; i++) {
-//						if(!servicePosts[i].isPostEmpty()) {
-//							Client temp = servicePosts[i].getCurrentClient();
-//							if(temp.getArrivalTime() > c.getArrivalTime() && !temp.isBeingServed() && !c.isBeingServed()) {
-//								c.overpassed();
-//							}
-//						}
-//					}
-//				}
-//			}
 	}
-	
+	/**
+	 * The monitor will store the expected waiting time for each post.
+	 * When a client arrives, will always choose the post with the lowest index
+	 * and expected waiting time.
+	 * @author Manuel E. Castañeda
+	 *
+	 */
 	private static class Monitor {
 		
 		private int[] queueTimes;
@@ -111,15 +110,25 @@ public class Policy4 extends AbstractPolicy {
 				queueTimes[i] = 0;
 			}
 		}
-		
+		/**
+		 * Will increase or decrease the selected post's expected waiting time.
+		 * @param index	The selected post's index.
+		 * @param time	Will increase (positive number) or decrease (negative number) the selected
+		 * post's expected waiting time.
+		 */
 		public void addPostTime(int index, int time) {
 			queueTimes[index] += time;
 		}
-		
+		/**
+		 * @param index	The selected post's index.
+		 * @return	Returns the expected waiting time for the selected post.
+		 */
 		private int getPostTime(int index) {
 			return queueTimes[index];
 		}
-		
+		/**
+		 * @return	Returns the lowest expected waiting time post's index.
+		 */
 		public int minWaitPost() {
 			int index=0;
 			int minWait = queueTimes[index];

@@ -14,6 +14,11 @@ public abstract class AbstractPolicy implements Policies {
 	protected static int serviceStations;
 	protected static ArrayList<Client> completedJobs;
 
+	/**
+	 * Initializes the service posts as a Basic service post.
+	 * @param serviceStations	The amount of service posts to be initialized.
+	 * @return	An array containing the initialized service posts.
+	 */
 	protected ServicePost[] initBasicPosts(int serviceStations) {
 		ServicePost[] servicePosts = new BasicPost[serviceStations];
 		for(int i=0; i<serviceStations; i++) {
@@ -21,7 +26,11 @@ public abstract class AbstractPolicy implements Policies {
 		}
 		return servicePosts;
 	}
-	
+	/**
+	 * Initializes the service posts as an Advanced service post.
+	 * @param serviceStations	The amount of service posts to be initialized.
+	 * @return	An array containing the initialized service posts.
+	 */
 	protected ServicePost[] initAdvancedPosts(int serviceStations) {
 		ServicePost[] servicePosts = new AdvancedPost[serviceStations];
 		for(int i=0; i<serviceStations; i++) {

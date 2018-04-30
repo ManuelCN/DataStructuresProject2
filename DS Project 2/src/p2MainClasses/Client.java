@@ -1,5 +1,10 @@
 package p2MainClasses;
-
+/**
+ * Implementation for clients. Each will contain information of when they will
+ * arrive, how long service will need to be provided, 
+ * @author manny
+ *
+ */
 public class Client {
 	
 	private int clientID;					//Id of this job

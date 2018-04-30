@@ -6,7 +6,15 @@ import java.util.Iterator;
 import p2MainClasses.Client;
 import posts.BasicPost;
 import posts.ServicePost;
-
+/**
+ * Multiple Lines Multiple Servers (MLMS)
+ * In this policy, each post has its own waiting queue.
+ * When a client arrives, it will be distributed to the lowest index post which is either empty
+ * or has the least amount of customers in its waiting queue with respect to the other posts
+ * (if any).
+ * @author Manuel E. Castañeda
+ *
+ */
 public class Policy2 extends AbstractPolicy {
 	
 	public Policy2(int postNum) {
@@ -20,12 +28,12 @@ public class Policy2 extends AbstractPolicy {
 	}
 
 	public boolean distribute(Client customer, int time) {
-		BasicPost selectedPost = (BasicPost) servicePosts[0];
+		BasicPost selectedPost = (BasicPost) this.getPost(0);
 		int size = selectedPost.clientNum();
 		if(serviceStations > 1) {
 			for(int i=1; i<serviceStations; i++) {
-				if(servicePosts[i].clientNum() < size) {
-					selectedPost = (BasicPost) servicePosts[i];
+				if(this.getPost(i).clientNum() < size) {
+					selectedPost = (BasicPost) this.getPost(i);
 					size = selectedPost.clientNum();
 				}
 			}
@@ -39,7 +47,7 @@ public class Policy2 extends AbstractPolicy {
 
 	public void provideService(int time, int service) {
 		for(int i=0; i<serviceStations; i++) {
-			BasicPost tempPost = (BasicPost) servicePosts[i];
+			BasicPost tempPost = (BasicPost) this.getPost(i);
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
 					tempPost.getCurrentClient().receivingService();
@@ -68,19 +76,21 @@ public class Policy2 extends AbstractPolicy {
 	}
 	
 	public void checkOverpass() {
-		if(servicePosts.length > 1) {
-			for(int post = 0; post < servicePosts.length; post++) {
-				Iterator<Client> iter = ((BasicPost) servicePosts[post]).getQueue().iterator();
+		if(serviceStations > 1) {
+			for(int post = 0; post < serviceStations; post++) {
+				Iterator<Client> iter = ((BasicPost) this.getPost(post)).getQueue().iterator();
 				while(iter.hasNext()) {
 					Client c = iter.next();
 					if(!this.arePostsEmpty()) {
-						if(!servicePosts[post].isPostEmpty()) {
-							if(servicePosts[post].getCurrentClient() != c) {
-								Client temp = servicePosts[post].getCurrentClient();
-								if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
-									c.overpassed();
+						for(int i=0; i<serviceStations; i++) {
+							if(!this.getPost(i).isPostEmpty()) {
+								Client temp = this.getPost(i).getCurrentClient();
+								if(temp != c) {
+									if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+										c.overpassed();
+									}
 								}
-							}
+							}	
 						}
 					}
 				}

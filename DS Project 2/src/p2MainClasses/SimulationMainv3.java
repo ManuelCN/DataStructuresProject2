@@ -7,7 +7,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import dataGenerator.DataReader;
+import dataGenerator.FileReader;
 import policies.AbstractPolicy;
 import policies.Policies;
 import policies.Policy1;
@@ -24,7 +24,7 @@ public class SimulationMainv3 {
 			parentDir.mkdir();
 		}
 		try {
-			DataReader reader = new DataReader();
+			FileReader reader = new FileReader();
 			for(int file = 0; file < reader.getFileNumber(); file++) {
 				System.out.println("--- Working with File " + file + " ---\n");
 				PrintWriter outputFile = new PrintWriter(new File(parentDir.toString(), "data_" + file + "_OUT.txt"));
