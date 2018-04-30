@@ -34,19 +34,6 @@ public abstract class AbstractPolicy implements Policies {
 		return servicePosts[index];
 	}
 	
-	public void removeCompleted(int time) {
-		for(int i=0; i<servicePosts.length; i++) {
-			ServicePost tempPost =  this.getPost(i);
-			if(!tempPost.isPostEmpty()) {
-				if(tempPost.getCurrentClient().getRemainingTime() == 0) {
-					Client temp = tempPost.removeFromPost();
-					System.out.println("Finished servicing customer " + temp.getClientID());
-					completedJobs.add(temp);
-				}
-			}
-		}
-	}
-	
 	public boolean arePostsEmpty() {
 		for(int i=0; i<serviceStations; i++) {
 			if(!servicePosts[i].isPostEmpty()) {	return false;	}

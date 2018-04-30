@@ -8,6 +8,7 @@ public class Client {
 	private int initServiceTime;			//Time at which service began
 	private int waitTime;					//Amount of time waited
 	private boolean beingServed;			//Indicates whether the client has being receiving service.
+	private int overpassedCustomers;
 	
 	public Client(int id, int at, int rt) {
 		clientID = id;
@@ -16,6 +17,7 @@ public class Client {
 		initServiceTime = 0;
 		waitTime = 0;
 		beingServed = false;
+		overpassedCustomers = 0;
 	}
 	
 	public boolean isBeingServed() {
@@ -56,11 +58,20 @@ public class Client {
 		this.waitTime = this.initServiceTime - this.arrivalTime;
 	}
 	
+	public void overpassed() {
+		overpassedCustomers++;
+	}
+	
+	public int getOverpassed() {
+		return overpassedCustomers;
+	}
+	
 	public String toString() {
 		return "Client ID = " + clientID +
 				", Arrival Time = " + arrivalTime +
-				", Remaining Time = " + remainingTime +
-				", Waiting Time = " + waitTime;
+				", Received Service at Time = " + initServiceTime +
+				", Waiting Time = " + waitTime +
+				", Overpassed Customers = " + overpassedCustomers;
 	}
 
 }

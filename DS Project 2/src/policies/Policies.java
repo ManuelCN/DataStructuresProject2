@@ -4,9 +4,14 @@ import java.util.ArrayList;
 
 import p2MainClasses.Client;
 import posts.ServicePost;
+import queue.Queue;
 
 public interface Policies {
 	
+	/**
+	 * @return	Returns the name of the policy used.
+	 */
+	String getPolicyName();
 	/**
 	 * Returns one of the service posts.
 	 * @param index	The index of the service post to be returned.
@@ -21,11 +26,6 @@ public interface Policies {
 	 * if otherwise, returns False.
 	 */
 	boolean distribute(Client customer, int time);
-	/**
-	 * Removes the clients whose remaining time reached zero from the service posts.
-	 * @param time	The time at which the service-completed event occurred.
-	 */
-	void removeCompleted(int time);
 	/**
 	 * For each post that is not empty, provide service for the amount of time specified 
 	 * to their current first customer.
@@ -57,9 +57,13 @@ public interface Policies {
 	 */
 	boolean isWaitEmpty();
 	/**
+	 * For each of the customers, checks the amount of other customers that arrived after
+	 * them but began receiving service before them.
+	 */
+	void checkOverpass();
+	/**
 	 * As the clients are done being serviced, they are added to a completed jobs ArrayList.
 	 * @return	The ArrayList containing all the clients that were serviced in the simulation.
 	 */
-	ArrayList<Client> getCompletedJobs();
-	
+	ArrayList<Client> getCompletedJobs();	
 }

@@ -1,6 +1,7 @@
 package policies;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import p2MainClasses.Client;
 import posts.BasicPost;
@@ -12,6 +13,10 @@ public class Policy2 extends AbstractPolicy {
 		serviceStations = postNum;
 		completedJobs = new ArrayList<>();
 		servicePosts = initBasicPosts(serviceStations);
+	}
+	
+	public String getPolicyName() {
+		return "MLMS";
 	}
 
 	public boolean distribute(Client customer, int time) {
@@ -25,9 +30,10 @@ public class Policy2 extends AbstractPolicy {
 				}
 			}
 		}
-		System.out.println("Added client " + customer.getClientID() +
-				" to service post " + selectedPost.getID());
 		selectedPost.addToPost(customer);
+		if(selectedPost.getCurrentClient() == customer) {
+			customer.setServiceInitTime(time);
+		}
 		return true;
 	}
 
@@ -36,15 +42,16 @@ public class Policy2 extends AbstractPolicy {
 			BasicPost tempPost = (BasicPost) servicePosts[i];
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
-					System.out.println("Began servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 					tempPost.getCurrentClient().receivingService();
-					tempPost.getCurrentClient().setServiceInitTime(time);
-				} else {
-					System.out.println("Servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 				}
 				tempPost.serviceCustomer(service);
+				if(tempPost.getCurrentClient().getRemainingTime() == 0) {
+					Client temp = tempPost.removeFromPost();
+					completedJobs.add(temp);
+					if(!tempPost.isPostEmpty()) {
+						tempPost.getCurrentClient().setServiceInitTime(time);
+					}
+				}
 			}
 		}
 	}
@@ -58,5 +65,28 @@ public class Policy2 extends AbstractPolicy {
 
 	public boolean isWaitEmpty() {
 		return this.arePostsEmpty();
+	}
+	
+	public void checkOverpass() {
+		if(servicePosts.length > 1) {
+			for(int post = 0; post < servicePosts.length; post++) {
+				Iterator<Client> iter = ((BasicPost) servicePosts[post]).getQueue().iterator();
+				while(iter.hasNext()) {
+					Client c = iter.next();
+					if(!this.arePostsEmpty()) {
+						for(int i=0; i<servicePosts.length; i++) {
+							if(!servicePosts[i].isPostEmpty()) {
+								if(servicePosts[i].getCurrentClient() != c) {
+									Client temp = servicePosts[i].getCurrentClient();
+									if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+										c.overpassed();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

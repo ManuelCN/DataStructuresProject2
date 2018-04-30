@@ -27,14 +27,6 @@ public class AdvancedPost implements ServicePost {
 		Client ctr = postQueue.removeLast();
 		return ctr;
 	}
-
-//	public boolean serviceCustomer(int service) {
-//		postQueue.first().isServed(service);
-//		if(postQueue.first().getRemainingTime() == 0) {
-//			return true;
-//		}
-//		return false;
-//	}
 	
 	public void serviceCustomer(int service) {
 		postQueue.first().isServed(service);
@@ -54,6 +46,10 @@ public class AdvancedPost implements ServicePost {
 	
 	public Client getLastClient() {
 		return postQueue.last();
+	}
+	
+	public Deque<Client> getQueue() {
+		return postQueue;
 	}
 
 	public int getID() {

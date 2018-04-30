@@ -14,9 +14,9 @@ public class FilesGeneratorMain {
 		
 		if (args.length <= 4) {
 			int n = 7; 						//Number of files
-			int l = 30;						//Number of clients
-			int t = 5;						//Arrival Times
-			int s = 15;						//Service times
+			int l = 200;						//Number of clients
+			int t = 4;						//Arrival Times
+			int s = 10;						//Service times
 			
 			if (args.length >= 1)	{	n = Integer.parseInt(args[0]);	}
 			if (args.length >= 2)	{	l = Integer.parseInt(args[1]);	}
@@ -51,7 +51,7 @@ public class FilesGeneratorMain {
 				out.print("\t");
 				out.print(rand.nextInt(serviceTimes) + 3);
 				out.println();
-				arriv = arriv + rand.nextInt(arrivalTimes);
+				arriv = arriv + rand.nextInt(arrivalTimes) + 1;
 //				arriv++;
 			}				
 			out.close();

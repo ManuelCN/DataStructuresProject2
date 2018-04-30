@@ -1,6 +1,8 @@
 package queue;
 
-public interface Deque<E> {
+import java.util.Iterator;
+
+public interface Deque<E> extends Iterable<E> {
 	void addFirst(E e);
 	void addLast(E e);
 	E removeFirst();
@@ -9,4 +11,5 @@ public interface Deque<E> {
 	E last();
 	int size();
 	boolean isEmpty();
+	Iterator<E> iterator();
 }

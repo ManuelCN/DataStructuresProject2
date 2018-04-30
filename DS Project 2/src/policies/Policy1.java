@@ -1,6 +1,7 @@
 package policies;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import p2MainClasses.Client;
 import posts.BasicPost;
@@ -19,13 +20,16 @@ public class Policy1 extends AbstractPolicy{
 		servicePosts = super.initBasicPosts(serviceStations);
 	}
 	
+	public String getPolicyName() {
+		return "SLMS";
+	}
+	
 	public boolean distribute(Client customer, int time) {
 		for(int i=0; i<serviceStations; i++) {
 			BasicPost tempPost = (BasicPost) servicePosts[i];
 			if(tempPost.isPostEmpty()) {
-				System.out.println("Added client " + customer.getClientID() +
-						" to service post " + tempPost.getID());
 				tempPost.addToPost(customer);
+				tempPost.getCurrentClient().setServiceInitTime(time);
 				return true;
 			}
 		}
@@ -37,28 +41,64 @@ public class Policy1 extends AbstractPolicy{
 			BasicPost tempPost = (BasicPost) servicePosts[i];
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
-					System.out.println("Began servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 					tempPost.getCurrentClient().receivingService();
-					tempPost.getCurrentClient().setServiceInitTime(time);
-				} else {
-					System.out.println("Servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 				}
 				tempPost.serviceCustomer(service);
+				if(tempPost.getCurrentClient().getRemainingTime() == 0) {
+					Client temp = tempPost.removeFromPost();
+					completedJobs.add(temp);
+				}
 			}
 		}
 	}
 	
 	public void addToWait(Client customer) {
-		System.out.println("Added customer " + customer.getClientID() + " to wait queue.");
 		waitingQueue.enqueue(customer);
 	}
 	
 	public void distributeWait(int time) {
 		Client tempClient = waitingQueue.first();
-		if(this.distribute(tempClient, time)) {	waitingQueue.dequeue();	}
+		while(this.distribute(tempClient, time)) {
+			waitingQueue.dequeue();
+			if(!waitingQueue.isEmpty()) {
+				tempClient = waitingQueue.first();
+			} else {
+				break;
+			}
+		}
+
 	}
 	
 	public boolean isWaitEmpty() {	return waitingQueue.isEmpty();	}
+
+	public void checkOverpass() {
+		if(servicePosts.length > 1) {
+			Iterator<Client> iter = waitingQueue.iterator();
+			while(iter.hasNext()) {
+				Client c = iter.next();
+				if(!this.arePostsEmpty()) {
+					for(int i=0; i<servicePosts.length; i++) {
+						if(!servicePosts[i].isPostEmpty()) {
+							if(servicePosts[i].getCurrentClient() != c) {
+								Client temp = servicePosts[i].getCurrentClient();
+								if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+									c.overpassed();
+								}
+							}
+						}
+					}
+				}
+//			if(!this.arePostsEmpty()) {
+//				for(int i=0; i<servicePosts.length; i++) {
+//					if(!servicePosts[i].isPostEmpty()) {
+//						Client temp = servicePosts[i].getCurrentClient();
+//						if(temp.getArrivalTime() > c.getArrivalTime() && !temp.isBeingServed()) {
+//							c.overpassed();
+//						}
+//					}
+//				}
+//			}
+			}
+		}
+	}
 }

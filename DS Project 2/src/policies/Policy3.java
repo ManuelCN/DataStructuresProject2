@@ -1,6 +1,7 @@
 package policies;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import p2MainClasses.Client;
 import posts.AdvancedPost;
@@ -17,6 +18,10 @@ public class Policy3 extends AbstractPolicy {
 		completedJobs = new ArrayList<>();
 		servicePosts = initAdvancedPosts(serviceStations);
 	}
+	
+	public String getPolicyName() {
+		return "MLMSBLL";
+	}
 
 	public boolean distribute(Client customer, int time) {
 		AdvancedPost selectedPost = (AdvancedPost) servicePosts[0];
@@ -31,28 +36,29 @@ public class Policy3 extends AbstractPolicy {
 				}
 			}
 		}
-		System.out.println("Added client " + customer.getClientID() +
-				" to service post " + selectedPost.getID());
 		selectedPost.addToPost(customer);
 		monitor.setPostLength(index, selectedPost.clientNum());
+		if(selectedPost.getCurrentClient() == customer) {
+			customer.setServiceInitTime(time);
+		}
 		return true;
 	}
 
 	public void provideService(int time, int service) {
-		int index=0;
 		for(int i=0; i<serviceStations; i++) {
 			AdvancedPost tempPost = (AdvancedPost) servicePosts[i];
 			if(!tempPost.isPostEmpty()) {
 				if(!tempPost.getCurrentClient().isBeingServed()) {
-					System.out.println("Began servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 					tempPost.getCurrentClient().receivingService();
-					tempPost.getCurrentClient().setServiceInitTime(time);
-				} else {
-					System.out.println("Servicing customer " + tempPost.getCurrentClient().getClientID() +
-							" at post " + tempPost.getID());
 				}
 				tempPost.serviceCustomer(service);
+				if(tempPost.getCurrentClient().getRemainingTime() == 0) {
+					Client temp = tempPost.removeFromPost();
+					completedJobs.add(temp);
+					if(!tempPost.isPostEmpty()) {
+						tempPost.getCurrentClient().setServiceInitTime(time);
+					}
+				}
 			}
 		}
 	}
@@ -69,7 +75,7 @@ public class Policy3 extends AbstractPolicy {
 					AdvancedPost minLenPost = (AdvancedPost) this.getPost(minIndex);
 					AdvancedPost maxLenPost = (AdvancedPost) this.getPost(maxIndex);
 					Client temp = maxLenPost.getLastClient();
-					if(!temp.isBeingServed()) {
+					if(maxLenPost.clientNum() > 1 && !temp.isBeingServed()) {
 						monitor.moveClient(maxLenPost, minLenPost);
 					}
 				}
@@ -80,6 +86,29 @@ public class Policy3 extends AbstractPolicy {
 
 	public boolean isWaitEmpty() {
 		return this.arePostsEmpty();
+	}
+	
+	public void checkOverpass() {
+		if(servicePosts.length > 1) {
+			for(int post = 0; post < servicePosts.length; post++) {
+				Iterator<Client> iter = ((AdvancedPost) servicePosts[post]).getQueue().iterator();
+				while(iter.hasNext()) {
+					Client c = iter.next();
+					if(!this.arePostsEmpty()) {
+						for(int i=0; i<servicePosts.length; i++) {
+							if(!servicePosts[i].isPostEmpty()) {
+								if(servicePosts[i].getCurrentClient() != c) {
+									Client temp = servicePosts[i].getCurrentClient();
+									if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+										c.overpassed();
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private static class Monitor {
@@ -104,7 +133,6 @@ public class Policy3 extends AbstractPolicy {
 			int targetNewLength = target.clientNum();
 			this.setPostLength(original.getID()-1, originalNewLength);
 			this.setPostLength(target.getID()-1, targetNewLength);
-			System.out.println("Moved client " + ctm.getClientID() + " from post " + original.getID() + " to post " + target.getID());
 		}
 		
 		public boolean postsHaveSameLength() {
@@ -130,7 +158,6 @@ public class Policy3 extends AbstractPolicy {
 					}
 				}
 			}
-			System.out.println("Min length post: " + (index+1) + " Size: " + minSize);
 			return index;
 		}
 		
@@ -145,8 +172,8 @@ public class Policy3 extends AbstractPolicy {
 					}
 				}
 			}
-			System.out.println("Max length post: " + (index+1) + " Size: " + maxSize);
 			return index;
 		}
 	}
+
 }

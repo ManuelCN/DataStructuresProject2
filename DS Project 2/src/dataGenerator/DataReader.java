@@ -2,6 +2,7 @@ package dataGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
@@ -33,8 +34,13 @@ public class DataReader {
 		return fileNames.size();
 	}
 	
-	public Object[] readDataFiles(int file) throws FileNotFoundException {
+	public String getFileName(int index) {
+		return fileNames.get(index);
+	}
+	
+	public Integer[] readDataFiles(int file) throws FileNotFoundException, NoSuchElementException {
 		String fileName = fileNames.get(file);
+		try {
 		Scanner inputFile = new Scanner(new File(parentDirectory, fileName));
 		ArrayList<Integer> fileContent = new ArrayList<>();
 		while(inputFile.hasNext()) {
@@ -43,12 +49,12 @@ public class DataReader {
 		}
 		inputFile.close();
 		return fileContent.toArray(new Integer[fileContent.size()]);
-
-	}
-	
-	private void printArray(Integer[] numbers) {
-		for (int i=0; i<numbers.length; i++) 
-			System.out.print(numbers[i] + "  "); 
-		System.out.println(); 
+		} catch (FileNotFoundException e) {
+			Integer[] result = {-1};
+			return result;
+		} catch (NoSuchElementException a) {
+			Integer[] result = {-2};
+			return result;
+		}
 	}
 }

@@ -1,6 +1,8 @@
 package queue;
 
-public interface Queue<E> {
+import java.util.Iterator;
+
+public interface Queue<E> extends Iterable<E>, Cloneable {
 	
 	int size();
 	boolean isEmpty(); 

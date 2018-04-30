@@ -1,6 +1,7 @@
 package posts;
 
 import p2MainClasses.Client;
+import queue.Queue;
 
 public interface ServicePost {
 	

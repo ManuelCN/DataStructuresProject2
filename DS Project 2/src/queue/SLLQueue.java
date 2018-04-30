@@ -1,5 +1,7 @@
 package queue;
 
+import java.util.Iterator;
+
 public class SLLQueue<E> implements Queue<E> {
 
 	private static class Node<E>{
@@ -88,5 +90,37 @@ public class SLLQueue<E> implements Queue<E> {
 		ntr.clean();
 		size--;
 		return etr;
+	}
+
+	@Override
+	public Iterator<E> iterator() {
+		return new QueueIterator();
+	}
+	
+	public SLLQueue<E> clone() {
+		SLLQueue<E> clone = new SLLQueue<>();
+		Iterator<E> iter = this.iterator();
+		while(iter.hasNext()) {
+			clone.enqueue(iter.next());
+		}
+		return clone;
+	}
+	
+	private class QueueIterator implements Iterator<E> {
+
+		private Node<E> current = SLLQueue.this.first;
+		
+		@Override
+		public boolean hasNext() {
+			return current != null;
+		}
+
+		@Override
+		public E next() {
+			E currElement = current.getElement();
+			current = current.getNext();
+			return currElement;
+		}
+		
 	}
 }

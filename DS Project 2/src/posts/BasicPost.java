@@ -22,14 +22,6 @@ public class BasicPost implements ServicePost {
 		Client ctr = postQueue.dequeue();
 		return ctr;
 	}
-
-//	public boolean serviceCustomer(int service) {
-//		postQueue.first().isServed(service);
-//		if(postQueue.first().getRemainingTime() == 0) {
-//			return true;
-//		}
-//		return false;
-//	}
 	
 	public void serviceCustomer(int service) {
 		postQueue.first().isServed(service);
@@ -45,6 +37,10 @@ public class BasicPost implements ServicePost {
 	
 	public Client getCurrentClient() {
 		return postQueue.first();
+	}
+	
+	public Queue<Client> getQueue() {
+		 return postQueue;
 	}
 	
 	public int getID() {

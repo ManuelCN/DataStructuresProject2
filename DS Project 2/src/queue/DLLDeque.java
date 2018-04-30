@@ -1,5 +1,7 @@
 package queue;
 
+import java.util.Iterator;
+
 public class DLLDeque<E> implements Deque<E> {
 
 	private static class Node<E>{
@@ -116,5 +118,28 @@ public class DLLDeque<E> implements Deque<E> {
 		prev.setNext(next);
 		next.setPrev(prev);
 		return etr;
+	}
+
+	@Override
+	public Iterator<E> iterator() {
+		return new DequeIterator();
+	}
+	
+	private class DequeIterator implements Iterator<E> {
+
+		private Node<E> current = DLLDeque.this.header.getNext();
+		
+		@Override
+		public boolean hasNext() {
+			return current != DLLDeque.this.trailer;
+		}
+
+		@Override
+		public E next() {
+			E currElement = current.getElement();
+			current = current.getNext();
+			return currElement;
+		}
+		
 	}
 }
