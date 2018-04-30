@@ -76,28 +76,16 @@ public class Policy1 extends AbstractPolicy{
 			Iterator<Client> iter = waitingQueue.iterator();
 			while(iter.hasNext()) {
 				Client c = iter.next();
-				if(!this.arePostsEmpty()) {
-					for(int i=0; i<servicePosts.length; i++) {
-						if(!servicePosts[i].isPostEmpty()) {
-							if(servicePosts[i].getCurrentClient() != c) {
-								Client temp = servicePosts[i].getCurrentClient();
-								if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
-									c.overpassed();
-								}
+				for(int post=0; post<servicePosts.length; post++) {
+					if(!servicePosts[post].isPostEmpty()) {
+						if(servicePosts[post].getCurrentClient() != c) {
+							Client temp = servicePosts[post].getCurrentClient();
+							if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+								c.overpassed();
 							}
 						}
 					}
 				}
-//			if(!this.arePostsEmpty()) {
-//				for(int i=0; i<servicePosts.length; i++) {
-//					if(!servicePosts[i].isPostEmpty()) {
-//						Client temp = servicePosts[i].getCurrentClient();
-//						if(temp.getArrivalTime() > c.getArrivalTime() && !temp.isBeingServed()) {
-//							c.overpassed();
-//						}
-//					}
-//				}
-//			}
 			}
 		}
 	}

@@ -74,13 +74,11 @@ public class Policy2 extends AbstractPolicy {
 				while(iter.hasNext()) {
 					Client c = iter.next();
 					if(!this.arePostsEmpty()) {
-						for(int i=0; i<servicePosts.length; i++) {
-							if(!servicePosts[i].isPostEmpty()) {
-								if(servicePosts[i].getCurrentClient() != c) {
-									Client temp = servicePosts[i].getCurrentClient();
-									if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
-										c.overpassed();
-									}
+						if(!servicePosts[post].isPostEmpty()) {
+							if(servicePosts[post].getCurrentClient() != c) {
+								Client temp = servicePosts[post].getCurrentClient();
+								if(!temp.isBeingServed() && (temp.getArrivalTime() > c.getArrivalTime())) {
+									c.overpassed();
 								}
 							}
 						}
