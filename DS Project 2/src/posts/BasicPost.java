@@ -5,8 +5,9 @@ import queue.Queue;
 import queue.SLLQueue;
 /**
  * Basic implementation of a service post using Singly Linked List Queues.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class BasicPost implements ServicePost {
 	

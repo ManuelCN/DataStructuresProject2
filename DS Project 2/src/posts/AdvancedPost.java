@@ -7,8 +7,9 @@ import queue.Deque;
  * Advanced implementation of a service post using Doubly Linked List Deques.
  * This advanced implementation allows quick access to first and last clients
  * in the post's queue.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class AdvancedPost implements ServicePost {
 	

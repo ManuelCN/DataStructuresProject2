@@ -1,4 +1,4 @@
-package dataGenerator;
+package dataFiles;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ public class FilesGeneratorMain {
 			int n = 7; 						//Number of files
 			int l = 200;						//Number of clients
 			int t = 4;						//Arrival Times
-			int s = 10;						//Service times
+			int s = 50;						//Service times
 			
 			if (args.length >= 1)	{	n = Integer.parseInt(args[0]);	}
 			if (args.length >= 2)	{	l = Integer.parseInt(args[1]);	}

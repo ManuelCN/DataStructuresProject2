@@ -15,8 +15,9 @@ import posts.ServicePost;
  * As service is provided, if a post becomes empty or its queue length decreases enough to benefit
  * the last customer of another post's waiting, then that last customer will be transferred to the
  * specified post.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class Policy3 extends AbstractPolicy {
 

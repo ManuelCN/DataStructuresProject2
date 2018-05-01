@@ -11,8 +11,9 @@ import posts.ServicePost;
  * In this policy, each post has its own waiting queue.
  * As clients arrive, they are distributed to the lowest index post which is either empty or 
  * has the lowest expected waiting time with respect to the others.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class Policy4 extends AbstractPolicy {
 

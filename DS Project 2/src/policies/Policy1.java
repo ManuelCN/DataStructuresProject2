@@ -15,8 +15,9 @@ import queue.SLLQueue;
  * The post chosen will always the lowest index possible.
  * If the client cannot be distributed when it arrives, it will join the waiting queue.
  * As soon as a post is available, the first client of the waiting queue will then be distributed.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class Policy1 extends AbstractPolicy{
 	

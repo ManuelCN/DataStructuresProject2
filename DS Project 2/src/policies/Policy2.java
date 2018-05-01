@@ -12,8 +12,9 @@ import posts.ServicePost;
  * When a client arrives, it will be distributed to the lowest index post which is either empty
  * or has the least amount of customers in its waiting queue with respect to the other posts
  * (if any).
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public class Policy2 extends AbstractPolicy {
 	

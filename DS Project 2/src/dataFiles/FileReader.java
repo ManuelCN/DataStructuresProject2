@@ -1,4 +1,4 @@
-package dataGenerator;
+package dataFiles;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -43,9 +43,10 @@ public class FileReader {
 		try {
 		Scanner inputFile = new Scanner(new File(parentDirectory, fileName));
 		ArrayList<Integer> fileContent = new ArrayList<>();
-		while(inputFile.hasNext()) {
-			fileContent.add(inputFile.nextInt());
-			fileContent.add(inputFile.nextInt());
+		while(inputFile.hasNextLine()) {
+			fileContent.add(Integer.parseInt(inputFile.findInLine("[0-9]+")));
+			fileContent.add(Integer.parseInt(inputFile.findInLine("[0-9]+")));
+			inputFile.nextLine();
 		}
 		inputFile.close();
 		return fileContent.toArray(new Integer[fileContent.size()]);
@@ -53,6 +54,9 @@ public class FileReader {
 			Integer[] result = {-1};
 			return result;
 		} catch (NoSuchElementException a) {
+			Integer[] result = {-2};
+			return result;
+		} catch (NumberFormatException b) {
 			Integer[] result = {-2};
 			return result;
 		}

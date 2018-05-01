@@ -1,9 +1,13 @@
 package p2MainClasses;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import dataGenerator.FileReader;
+import dataFiles.FileReader;
 import policies.AbstractPolicy;
 import policies.Policies;
 import policies.Policy1;
@@ -11,106 +15,128 @@ import policies.Policy2;
 import policies.Policy3;
 import policies.Policy4;
 import posts.ServicePost;
-import queue.Queue;
 import queue.SLLQueue;
-
+/**
+ * This class runs the simulation of clients receiving service at varying amount of posts
+ * according to different policies.
+ * First reads the data from given files. Verifies if the data is valid according to
+ * specific restrictions.
+ * For each file and varying amounts of posts and different policies, simulates the whole 
+ * scenario. The scenario simulation will return the average waiting time and the average 
+ * amount of overpasses for the given amount of clients.
+ * Will generate an output file with this information for each file.
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
+ *
+ */
 public class SimulationMain {
-	
-	private static FileReader reader;
-	private static Integer[] readData;
-	private static int serviceStations;
-
 	public static void main(String[] args) {
-		
-		serviceStations = 1;
-		
+		File parentDir = new File("outputFiles");
+		if(!parentDir.exists()) {
+			parentDir.mkdir();
+		}
 		try {
-			reader = new FileReader();
-			int file = 0;
-			readData = (Integer[]) reader.readDataFiles(file);
-			printDataArray(readData);
-			System.out.println("Working with File " + file);
-			double averageWaiting = 0;
-			double averageOverpasses = 0;
-			int completedTime = 0;
-			if(readData.length == 0) {
-				System.out.println("Input file does not meet the expected format or it is empty.");
-			} else {
-				SLLQueue<Client> clientQueue = fillClientQueue(readData);
-				AbstractPolicy policy = new Policy4(serviceStations);
-				SLLQueue<Client> policyClientQueue = clientQueue.clone();
-				
-				int time = policyClientQueue.first().getArrivalTime();
-				int diffTime = time - 1;
-				boolean complete = false;
-				while(!complete) {
-					int servTime = time - diffTime;
-					System.out.println("------------ Time: " + time + " ------------");
-					//Transfer Events, if any
-					if(!policy.isWaitEmpty()) {			policy.distributeWait(time);			}
-					//Service-Provided Events (check for Service-Completed Events)
-					if(!policy.arePostsEmpty()) {		policy.provideService(time, servTime);	}
-					//Arrival Events
-					if(!policyClientQueue.isEmpty()) {
-						Client tempClient = policyClientQueue.first();
-						if(tempClient.getArrivalTime() == time) {
-							if(!policy.distribute(tempClient, time)) {
-								policy.addToWait(tempClient);
+			FileReader reader = new FileReader();
+			for(int file = 0; file < reader.getFileNumber(); file++) {
+				System.out.println("--- Working with File " + file + " ---\n");
+				//Prepares to write the output file for the given input file.
+				PrintWriter outputFile = new PrintWriter(new File(parentDir.toString(), "data_" + file + "_OUT.txt"));
+				//Reads the data from the input files.
+				Integer[] data = reader.readDataFiles(file);
+				if(data.length != 0 && data[0] == -1) {
+					outputFile.print("Input file not found.");
+				} else if(data.length == 0 || data[0] == -2) {
+					outputFile.print("Input file does not meet the expected format or it is empty.");
+				} else {
+					outputFile.println("Number of customers is: " + data.length / 2);
+					AbstractPolicy policy;
+					
+					for(int pol = 0; pol < 4; pol++) {	//Iterates over the different policies.
+						for(int posts = 1; posts <= 5; posts+=2) {	//Iterates over the varying amount of posts.
+							
+							if(pol == 0) 		{	policy = new Policy1(posts);	}
+							else if(pol == 1) 	{	policy = new Policy2(posts);	}
+							else if(pol == 2)	{	policy = new Policy3(posts);	}
+							else				{	policy = new Policy4(posts);	}
+							
+							System.out.println(policy.getPolicyName() + " with " + posts + " post(s).");
+							SLLQueue<Client> policyClientQueue = fillClientQueue(data);
+							int time = policyClientQueue.first().getArrivalTime();
+							int diffTime = time - 1;
+							boolean complete = false;
+							int completedTime = 0;
+							
+							while(!complete) {
+								int servTime = time - diffTime;
+								//Transfer Events, if any
+								if(!policy.isWaitEmpty()) {			policy.distributeWait(time);			}
+								//Service-Provided Events
+								if(!policy.arePostsEmpty()) {		policy.provideService(time, servTime);	}
+								//Checks overpasses
+								if(!policy.isWaitEmpty() || !policy.arePostsEmpty()) {
+									policy.checkOverpass();
+								}
+								//Arrival Events
+								if(!policyClientQueue.isEmpty()) {
+									Client tempClient = policyClientQueue.first();
+									if(tempClient.getArrivalTime() == time) {
+										if(!policy.distribute(tempClient, time)) {
+											policy.addToWait(tempClient);
+										}
+										policyClientQueue.dequeue();
+									}
+								}
+								//If everything is empty, simulation is done.
+								if(policyClientQueue.isEmpty() && policy.isWaitEmpty() && policy.arePostsEmpty()) {
+									complete = true;
+									completedTime = time;
+								}
+								diffTime = time;
+								time = getNextTime(time, policyClientQueue, policy, posts);
+							} //Closing simulation loop.
+							
+							ArrayList<Client> terminatedJobs = policy.getCompletedJobs();
+							//Calculates the average waiting time and overpasses.
+							double avgTime = 0;
+							double avgOverpasses = 0;
+							for(int i=0; i<terminatedJobs.size(); i++) {
+								avgTime += terminatedJobs.get(i).getWaitTime();
+								avgOverpasses += terminatedJobs.get(i).getOverpassed();
 							}
-							policyClientQueue.dequeue();
+							avgTime = avgTime/(double) terminatedJobs.size();
+							avgOverpasses = avgOverpasses/(double) terminatedJobs.size();
+							
+							DecimalFormat df = new DecimalFormat("#.##");
+							df.setRoundingMode(RoundingMode.FLOOR);
+							double avgT = new Double(df.format(avgTime));
+							double avgO = new Double(df.format(avgOverpasses));
+							//Writes into the output file the calculated average values.
+							if(pol <= 1) {
+								outputFile.println(policy.getPolicyName() + " " + posts + ":\t\t" + completedTime +
+										"\t" + avgT + "\t" + avgO);
+							} else {
+								outputFile.println(policy.getPolicyName() + " " + posts + ":\t" + completedTime +
+										"\t" + avgT + "\t" + avgO);
+							}
 						}
 					}
-						
-					if(!policy.isWaitEmpty() || !policy.arePostsEmpty()) {
-						policy.checkOverpass();
-					}
-					//If everything is empty, simulation is done.
-					if(policyClientQueue.isEmpty() && policy.isWaitEmpty() && policy.arePostsEmpty()) {
-						complete = true;
-						completedTime = time;
-					}
-					
-//					if(time >= 100 || time < 0) {
-//						complete = true;
-//						System.out.println("DEBUG THIS");
-//					}
-					diffTime = time;
-					time = getNextTime(time, policyClientQueue, policy);
-				} //Closing simulation loop.
-				System.out.println();
-				
-				//Gets the completed jobs list for the chosen policy.
-				ArrayList<Client>terminatedJobs = policy.getCompletedJobs();
-				int avgTime = 0;
-				int avgOverpasses = 0;
-				for(int j=0; j<terminatedJobs.size(); j++) {
-					avgTime += terminatedJobs.get(j).getWaitTime();
-					avgOverpasses += terminatedJobs.get(j).getOverpassed();
 				}
-				averageWaiting = avgTime/(double) terminatedJobs.size();
-				averageOverpasses = avgOverpasses/(double) terminatedJobs.size();
-	
-			} //Closing if-else.
-			System.out.println();
-			//Displays average waiting times for data of each file.
-			System.out.println("Completed time: " + completedTime);
-			System.out.printf("Average waiting time for file " + (file) + ": %10.2f", averageWaiting);
-			System.out.printf("\nOverpassed customers: %10.2f", averageOverpasses);
-
-		} catch (FileNotFoundException e1) {
-			System.out.println("Directory and/or file not found!");
-		}	
-	}
-	
-	private static void printDataArray(Integer[] data) {
-			for(int j=0; j<data.length; j=j+2) {
-				System.out.print(data[j] + ", ");
-				System.out.print(data[j+1] + "\n");
+			outputFile.println();
+			//Closes the output file.
+			outputFile.close();
 			}
-			System.out.println();
+		} catch (FileNotFoundException e) {
+			System.out.println("Input directory 'inputFiles' not found.");
+		}
+		
 	}
-	
-	private static SLLQueue<Client> fillClientQueue(Integer[] data){
+	/**
+	 * Fills the input client queue with the file data, located in an array.
+	 * @param data	The array containing the file data.
+	 * @return	Returns the queue containing the input file data.
+	 */
+	private static SLLQueue<Client> fillClientQueue(Integer[] data) {
 		SLLQueue<Client> clientQueue = new SLLQueue<>();
 		int id = 1;
 		for(int i=0; i<data.length; i=i+2) {
@@ -121,11 +147,18 @@ public class SimulationMain {
 		System.out.println("Finished adding to Queue\n");
 		return clientQueue;
 	}
-	
-	private static int getNextTime(int time, SLLQueue<Client> cq, Policies policy) {
-		int increment = 50;
+	/**
+	 * Calculates the increment in time.
+	 * @param time	The previous time unit.
+	 * @param cq	The input client queue.
+	 * @param policy	The current policy.
+	 * @param posts	The current amount of posts.
+	 * @return	Returns the current time unit plus the calculated increment.
+	 */
+	private static int getNextTime(int time, SLLQueue<Client> cq, Policies policy, int posts) {
+		int increment = 50;		//Dummy max value.
 		if(!policy.arePostsEmpty()) {
-			for(int i=0; i<serviceStations; i++) {
+			for(int i=0; i<posts; i++) {
 				ServicePost tempPost = policy.getPost(i);
 				if(!tempPost.isPostEmpty()) {
 					int tempTime = tempPost.getCurrentClient().getRemainingTime();
@@ -136,11 +169,15 @@ public class SimulationMain {
 					}
 				}
 			}
+		} else {
+			if(!policy.isWaitEmpty()) {
+				increment = 1;
+			}
 		}
 		
 		if(!cq.isEmpty()) {
 			int tempTime = cq.first().getArrivalTime();
-			if(tempTime - time < increment) {	increment = tempTime - time;	}
+			if(tempTime - time < increment && tempTime - time >= 0) {	increment = tempTime - time;	}
 			if(cq.size() > 1) {
 				tempTime = cq.second().getArrivalTime();
 				if(tempTime - time < increment) {	increment = tempTime - time;	}
@@ -148,5 +185,4 @@ public class SimulationMain {
 		}
 		return time + increment;
 	}
-
 }

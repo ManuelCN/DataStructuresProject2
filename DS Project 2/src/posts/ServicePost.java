@@ -6,8 +6,9 @@ import queue.Queue;
  * Interface for service posts. Will do work on clients, like providing service,
  * adding or removing from the queue, and will return information regarding
  * the process.
- * @author Manuel E. Castañeda
- *
+ * @author	Manuel E. Castañeda
+ * 			802-15-1272
+ * 			Section 090
  */
 public interface ServicePost {
 	/**
